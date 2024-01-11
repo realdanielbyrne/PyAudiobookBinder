@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm"]
+requires = ["setuptools>=63.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 
@@ -11,30 +11,28 @@ description = "A Python script using ffmeg which simpliies the process of bindin
 readme = "README.md"
 requires-python=">=3.9.0"
 classifiers=[
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Authors",
+    
+    "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Developers",
-    "Intended Audience :: Audiobook Developers",
+    "Intended Audience :: Information Technology",
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python",
     "Topic :: Audiobook Development",
     "Topic :: Authorship",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",    
+    "Programming Language :: Python :: 3.9",    
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
   "argparse",
-  "ipykernel",
-  "ipython",
 ]
-dynamic = ["readme"]
 
 [project.urls]
-"Homepage"="https://github.com/realdanielbyrne/pyaudiobookbinder"
+Homepage="https://github.com/realdanielbyrne/PyAudiobookBinder"
 
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.dynamic]
-readme = {file = ["README.md"], content-type = "text/markdown"}
 
+[project.scripts]
+pyaudiobookbinder = "pyaudiobookbinder:pybind"
