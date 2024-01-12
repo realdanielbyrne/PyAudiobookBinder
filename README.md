@@ -48,12 +48,15 @@ pip install pyaudiobookbinder
 ### Usage
 To use PyAudiobookBinder, navigate to the directory containing your MP3 files and execute the script with the necessary arguments. The basic command structure is:
 
-
+``` shell
+pybind [arguments]
 ```
-python pyaudiobookbinder.py [arguments]
+
+``` shell
+usage: pybind [-h] [-d DIRECTORY] [-t TITLE] [-a AUTHOR] [-e ENCODER] [-b BITRATE]
 ```
 
-(Include a list of available arguments and their descriptions. Also, provide a few examples of common use cases.)
+
 
 
 
