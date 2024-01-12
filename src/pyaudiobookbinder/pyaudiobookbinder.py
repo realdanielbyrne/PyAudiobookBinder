@@ -41,7 +41,7 @@ Description:
   
   The above commane binds MP3 in the directory ./TomSawyer_MarkTwain, extracts title and author from the directory name, 
   sets the bitrate to common bitrate of the MP3 files, encodes the output file with aac, and attaches the cover art if
-  found in the directory. The output file will be named 'TomSawyer_MarkTwain.m4b' and will be located in the same
+  found in the directory. The output file will be named 'Tom Sawyer - Mark Twain.m4b' and will be located in the same
   directory as the source files.
   
 """

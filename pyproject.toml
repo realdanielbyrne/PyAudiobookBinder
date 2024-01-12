@@ -17,8 +17,6 @@ classifiers=[
     "Intended Audience :: Information Technology",
     "Development Status :: 4 - Beta",
     "Programming Language :: Python",
-    "Topic :: Audiobook Development",
-    "Topic :: Authorship",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",    
     "License :: OSI Approved :: MIT License",
