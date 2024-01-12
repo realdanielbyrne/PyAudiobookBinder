@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="pyaudiobookbinder"
-version="0.1.0"
+version="0.2.0"
 authors =[{name="Daniel Byrne",email="realdanielbyrne@icloud.com"}]
-description = "A Python script using ffmeg which simpliies the process of binding multiple audio files togethers into an audiobook by gleaming smart defaults from the audio files's metadata, locations, durations, and names."
+description = "PyAudioBookBinder is a lightweight tool using ffmeg which simplifies the process of binding multiple audio files togethers into an audiobook by gleaming smart defaults from the audio files's metadata, locations, durations, and names."
 readme = "README.md"
 requires-python=">=3.9.0"
 classifiers=[

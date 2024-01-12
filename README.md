@@ -1,6 +1,7 @@
 PyAudiobookBinder
 =================
-PyAudiobookBinder is a lightweight wrapper around ffmpeg that can be used to bind mp3s together into an m4b audiobook.
+PyAudioBookBinder is a lightweight tool using ffmeg which simplifies the process of binding multiple audio files togethers
+into an audiobook by gleaming smart defaults from the audio files's metadata, locations, durations, and names.
 
 ## Overview
 PyAudiobookBinder is a lightweight wrapper around ffmpeg that can be used to bind mp3s together into an m4b audiobook. 
