@@ -1,11 +1,14 @@
 # %%
 import re
-import subprocess, json, os, glob, sys
+import subprocess
+import json
+import os
+import glob
+import sys
 import datetime
 from collections import Counter
 import argparse
 from argparse import RawTextHelpFormatter
-
 
 encoders = ["aac", "alac", "flac", "libmp3lame", "mpeg4"]
 
@@ -44,7 +47,9 @@ Description:
   directory as the source files.
   
 """
-#%%
+
+# %%
+
 class PyAudiobookBinder:
     """
     Args:
@@ -85,7 +90,8 @@ class PyAudiobookBinder:
             directory = os.getcwd()
         self.directory = directory
 
-        files_list = [f for f in os.listdir(self.directory) if f.endswith(".mp3")]
+        files_list = [f for f in os.listdir(
+            self.directory) if f.endswith(".mp3")]
         if files_list == []:
             print(f"No MP3 files found in {self.directory}")
             sys.exit(0)
@@ -94,9 +100,9 @@ class PyAudiobookBinder:
             raise ValueError(
                 f"Invalid encoder: {encoder}.  Valid encoders are: {encoders}"
             )
-            
+
         self.encoder = encoder
-        
+
         if title == "":
             self.title = self.extract_title()
             print(f"Title: {self.title}")
@@ -138,7 +144,8 @@ class PyAudiobookBinder:
             self.create_chapters_file(self.directory)
 
         chapters = list()
-        pattern = re.compile(r"(\d+ day[s]?, )?(\d+):(\d+):(\d+)\.\d{3}\s+(.*)")
+        pattern = re.compile(
+            r"(\d+ day[s]?, )?(\d+):(\d+):(\d+)\.\d{3}\s+(.*)")
 
         with open(self.chapters_file_path, "r") as f:
             for line in f:
@@ -147,7 +154,8 @@ class PyAudiobookBinder:
                     # Extracting days, hours, minutes, seconds, and chapter name
                     days, hrs, mins, secs, title = x.groups()
                     days = int(days.split()[0]) if days else 0
-                    hrs = int(hrs) + days * 24  # Convert days to hours and add to hours
+                    # Convert days to hours and add to hours
+                    hrs = int(hrs) + days * 24
                     mins = int(mins)
                     secs = int(secs)
 
@@ -169,7 +177,8 @@ class PyAudiobookBinder:
             start = chap["startTime"]
             end = chapters[i + 1]["startTime"] - 1
             text += (
-                f"[CHAPTER]\nTIMEBASE=1/1000\nSTART={start}\nEND={end}\ntitle={title}\n"
+                f"[CHAPTER]\nTIMEBASE=1/1000\nSTART={
+                    start}\nEND={end}\ntitle={title}\n"
             )
 
         meta_filepath = os.path.join(self.directory, "ffmetadata.txt")
@@ -177,9 +186,10 @@ class PyAudiobookBinder:
             myfile.write(text)
 
         print("Created metadata file ffmetadata.txt")
+
         return meta_filepath
 
-    def get_filename_without_extension(self, filepath) :
+    def get_filename_without_extension(self, filepath):
         """
         Extracts the filename without extension from the given filepath.
 
@@ -193,6 +203,7 @@ class PyAudiobookBinder:
         filename_with_ext = os.path.basename(filepath)
         # Split the filename and extension, and return just the filename
         filename_without_ext = os.path.splitext(filename_with_ext)[0]
+
         return filename_without_ext
 
     def create_chapters_file(self) -> str:
@@ -212,7 +223,8 @@ class PyAudiobookBinder:
             self.directory = os.getcwd()
 
         # List all MP3 files
-        files_list = [f for f in os.listdir(self.directory) if f.endswith(".mp3")]
+        files_list = [f for f in os.listdir(
+            self.directory) if f.endswith(".mp3")]
         if files_list == []:
             print(f"No MP3 files found in {self.directory}")
             sys.exit(-1)
@@ -224,7 +236,8 @@ class PyAudiobookBinder:
         for file in files_list:
             title = self.get_filename_without_extension(file)
             if self.number_separator != "":
-                title = self.number_separator.join(title.split(self.number_separator)[1:])
+                title = self.number_separator.join(
+                    title.split(self.number_separator)[1:])
 
             filepath = os.path.join(self.directory, file)
             audioLength = self.get_duration(filepath)
@@ -236,8 +249,9 @@ class PyAudiobookBinder:
         if not os.path.exists(chapters_filepath):
             print(f"Creating chapters file {chapters_filepath} ...")
             with open(chapters_filepath, "w") as chaptersFile:
-              for chapter in rawChapters:
-                chaptersFile.write(chapter + "\n")
+                for chapter in rawChapters:
+                    chaptersFile.write(chapter + "\n")
+
         return chapters_filepath
 
     def get_duration(self, filename) -> float:
@@ -250,10 +264,12 @@ class PyAudiobookBinder:
         Returns:
             float: The duration in seconds.
         """
+
         result = subprocess.check_output(
             f'ffprobe -v error -show_format -of json "{filename}"', shell=True
         ).decode()
         fields = json.loads(result)["format"]
+
         return float(fields["duration"])
 
     def get_bitrate(self, filename) -> int:
@@ -266,6 +282,7 @@ class PyAudiobookBinder:
         Returns:
             int: The bitrate in kbps.
         """
+
         result = subprocess.check_output(
             f'ffprobe -v error -show_format -of json "{filename}"', shell=True
         ).decode()
@@ -274,6 +291,7 @@ class PyAudiobookBinder:
         if "bit_rate" not in fields:
             return 128
         bitrate = int(fields["bit_rate"]) // 1000
+
         return bitrate
 
     def get_common_bitrate(self) -> int:
@@ -300,9 +318,10 @@ class PyAudiobookBinder:
         print(f"Detected bit rates:{bitrates}")
         most_common_bitrate = Counter(bitrates).most_common(1)[0][0]
         print(f"Most common bit rate: {most_common_bitrate}k\n")
+
         return most_common_bitrate
 
-    def extract_book_info_from_directory(self, directory_name)  -> tuple[str, str]:
+    def extract_book_info_from_directory(self, directory_name) -> tuple[str, str]:
         """
         Extracts the title and author of the audiobook from the directory name. The directory name
         should conform to the pattern '{TitleOfBook}_{AuthorName}' in order for the title and author
@@ -315,11 +334,11 @@ class PyAudiobookBinder:
         Returns:
             tuple: The title and author of the audiobook as a tuple.
         """
-        
+
         # If the directory name is empty, return empty strings
         if not directory_name:
             return "Unknown Title", "Unknown Author"
-          
+
         # Extracting the last part of the directory name
         name_part = directory_name.split("/")[-1]
 
@@ -366,6 +385,7 @@ class PyAudiobookBinder:
             string: The author of the audiobook.
         """
         _, author = self.extract_book_info_from_directory(self.directory)
+
         return author
 
     def find_cover_image(self) -> str:
@@ -393,6 +413,7 @@ class PyAudiobookBinder:
         Returns:
             string: The filepath of the created file list.
         """
+
         mp3_files = sorted(
             [f for f in os.listdir(self.directory) if f.endswith(".mp3")]
         )
@@ -412,49 +433,50 @@ class PyAudiobookBinder:
 
     def merge(self) -> None:
         """ Combines the MP3 files into a single M4B file using ffmpeg."""
-
         print("Combining files using ffmpeg ...\n")
 
         # build ffmpeg command
-        ffmpeg_cmd = ["ffmpeg","-y","-f","concat","-safe","0","-i",self.file_list_path]
-                        
+        ffmpeg_cmd = ['ffmpeg', '-y', '-f', 'concat',
+                      '-safe', '0', '-i', self.file_list_path]
+
         # import image
-        if self.image != "" and os.path.exists(self.image):
-            ffmpeg_cmd.extend(["-i", self.image])
-            
+        if self.image != '' and os.path.exists(self.image):
+            ffmpeg_cmd.extend(['-i', self.image])
+
         # import metadata
-        if self.meta_filepath != "" and os.path.exists(self.meta_filepath):
-            ffmpeg_cmd.extend(["-i", self.meta_filepath])
-        
+        if self.meta_filepath != '' and os.path.exists(self.meta_filepath):
+            ffmpeg_cmd.extend(['-i', self.meta_filepath])
+
         # map audio streams
-        ffmpeg_cmd.extend(["-map","0:a"]) 
+        ffmpeg_cmd.extend(['-map', '0:a'])
         i = 1
-        
+
         # map image
-        if self.image != "" and os.path.exists(self.image):
-          ffmpeg_cmd.extend(["-map",f"{i}:v"])
-          i = i+1
+        if self.image != '' and os.path.exists(self.image):
+            ffmpeg_cmd.extend(['-map', f'{i}:v'])
+            i = i+1
 
         # map metadata
-        if self.meta_filepath != "" and os.path.exists(self.meta_filepath):
-            ffmpeg_cmd.extend(["-map_metadata", f'{i}'])
-                
-        ffmpeg_cmd.extend([  
-                "-c:a",
-                f"{self.encoder}",
-                "-c:v",
-                "copy",
-                "-disposition:v:0",
-                "attached_pic",
-                "-b:a",
-                f"{self.bitrate}k",
-                "-threads",
-                "0",
-                "-fps_mode:a",
-                "auto",
-                f"{os.path.join(self.directory, f'{self.title} - {self.author}')}.m4b"
-            ])
-        
+        if self.meta_filepath != '' and os.path.exists(self.meta_filepath):
+            ffmpeg_cmd.extend(['-map_metadata', f'{i}'])
+
+        ffmpeg_cmd.extend([
+            '-c:a',
+            f'{self.encoder}',
+            '-c:v',
+            'copy',
+            '-disposition:v:0',
+            'attached_pic',
+            '-b:a',
+            f'{self.bitrate}k',
+            '-threads',
+            '0',
+            '-fps_mode:a',
+            'drop',
+            f'{os.path.join(self.directory, f"{
+                self.title} - {self.author}")}.m4b'
+        ])
+
         # Convert all elements to strings and join them with spaces to print out the command
         array_as_string = ' '.join([str(element) for element in ffmpeg_cmd])
         print(f"\n{array_as_string}\n")
@@ -479,20 +501,19 @@ def is_notebook() -> bool:
 
 def pybind() -> None:
     # parse command line arguments
-    parser = argparse.ArgumentParser(description=description,formatter_class=RawTextHelpFormatter)
-    
+    parser = argparse.ArgumentParser(
+        description=description, formatter_class=RawTextHelpFormatter)
+
     parser.add_argument(
         "-d",
         "--directory",
         default=".",
-        help=        
-"""The directory path containing the MP3 files to be concatenated into an M4B file. Defaults to the current directory. The directory name will 
-be used as the output file name if one is nor provided. The directory name can contain the Title of the book followed by an underscore and then 
-the Author's name. For example if the directory name was 'TomSawyer_MarkTwain', the output file would be named 'TomSawyer_MarkTwain.m4b', 
-the metadata Title be interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
+        help="""The directory path containing the MP3 files to be concatenated into an M4B file. Defaults to the current directory. The directory name will be used 
+as the output file name if one is nor provided. The directory name can contain the Title of the book followed by an underscore and then the Author's
+name. For example if the directory name was 'TomSawyer_MarkTwain', the output file would be named 'TomSawyer_MarkTwain.m4b', the metadata Title be 
+interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
 
-""",
-    )
+""")
 
     parser.add_argument(
         "-t",
@@ -500,13 +521,11 @@ the metadata Title be interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         action="store",
         type=str,
         default="",
-        help=
-"""The title of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern
+        help="""The title of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern
 '{TitleOfBook}_{AuthorsName}' in order for the title to be extracted correctly. Each word in the title should be capitalized.  For example, 
 'TomSawyer_MarkTwain' would be extracted as 'Tom Sawyer'.
 
-""",
-    )
+""")
 
     parser.add_argument(
         "-a",
@@ -514,13 +533,11 @@ the metadata Title be interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         action="store",
         type=str,
         default="",
-        help=
-"""The author of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern 
+        help="""The author of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern 
 '{TitleOfBook}_{AuthorsName}' in order for the author to be extracted correctly. Each word in the author's name should be capitalized.  For example, 
 'TomSawyer_MarkTwain' would be extracted as 'Mark Twain'.
 
-""",
-    )
+""")
 
     parser.add_argument(
         "-c",
@@ -528,12 +545,10 @@ the metadata Title be interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         action="store",
         type=str,
         default="",
-        help=
-"""The path to the cover art of the book.  If not provided, this software will look for cover.jpg or cover.png in the source directory, and if found this 
+        help="""The path to the cover art of the book.  If not provided, this software will look for cover.jpg or cover.png in the source directory, and if found this 
 image wil be atached to the m4b ourput file. If nott found and not specified here, no image will be included'.
 
-""",
-    )
+""")
 
     parser.add_argument(
         "-e",
@@ -544,8 +559,7 @@ image wil be atached to the m4b ourput file. If nott found and not specified her
         help="""The audio encoder to be used for the M4B file. AAC is the default for a compressed audiobook. FLAC is the standard for an uncompressed audiobook.
 
 """,
-        choices=["aac", "alac", "flac", "libmp3lame", "mpeg4"],
-    )
+        choices=["aac", "alac", "flac", "libmp3lame", "mpeg4"])
 
     parser.add_argument(
         "-b",
@@ -553,31 +567,27 @@ image wil be atached to the m4b ourput file. If nott found and not specified her
         action="store",
         type=int,
         default=0,
-        help=
-"""The bitrate to be used for the M4B file. Defaults to the most common bitrate among the MP3 files in the directory. For example, if the directory contains
+        help="""The bitrate to be used for the M4B file. Defaults to the most common bitrate among the MP3 files in the directory. For example, if the directory contains
 128k, 192k, and 192k mp3 files, the output file will be encoded at 192k.
 
-""",
-    )
-    
+""")
+
     parser.add_argument(
-      "-n",
-      "--number_separator",
-      action="store",
-      type=str,
-      default="",
-      help=
-"""The character(s) used to separate the chapter number from the chapter title in the MP3 filenames. For example, if the MP3 filenames are '01 - Chapter Title.mp3',
+        "-n",
+        "--number_separator",
+        action="store",
+        type=str,
+        default="",
+        help="""The character(s) used to separate the chapter number from the chapter title in the MP3 filenames. For example, if the MP3 filenames are '01 - Chapter Title.mp3',
 '02 - Chapter Title.mp3', etc., then the number separator would be ' - ' (space, dash, space) and title would be extracted as 'Chapter Title'. If no number 
 separator is provided, the chapter title will simply be the filename without the extension.
 
-""",          
-    )
+""")
 
     if is_notebook():
-        # for running in a notebook or vscode
         a = parser.parse_args("")
-        directory = "../../tests/ToSleepInASeaOfStars_ChristopherPaolini"  # change this line to the directory containing the mp3 files
+        # change this line to the directory containing the mp3 files for running in a notebook or vscode
+        directory = "../../tests/ToSleepInASeaOfStars_ChristopherPaolini"
     else:
         a = parser.parse_args()
         directory = a.directory
