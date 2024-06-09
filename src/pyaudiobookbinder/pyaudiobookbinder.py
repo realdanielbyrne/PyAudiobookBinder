@@ -12,40 +12,40 @@ from argparse import RawTextHelpFormatter
 
 encoders = ["aac", "alac", "flac", "libmp3lame", "mpeg4"]
 
-description = """
+DESCRIPTION = """
 Description:
-  PyAudiobookBinder is a lightweight wrapper around ffmpeg that can be used to bind mp3s together into an m4b audiobook. 
-  It sole purpose is to bind multiple audio files with metadata into a single M4B file. The utility is designed to  
-  simplify ffmpeg by eliminating the need to remember the ffmpeg command line options and to automate the most basic 
-  binding operations in a minimalistic way and to limit the amount of configuration options needing to be set by 
+  PyAudiobookBinder is a lightweight wrapper around ffmpeg that can be used to bind mp3s together into an m4b audiobook.
+  It sole purpose is to bind multiple audio files with metadata into a single M4B file. The utility is designed to
+  simplify ffmpeg by eliminating the need to remember the ffmpeg command line options and to automate the most basic
+  binding operations in a minimalistic way and to limit the amount of configuration options needing to be set by
   inferring most information from the audio files, their location, and by the company of files they keep.
 
   To keep it simple, the title and author of the audiobook can be extracted from the directory name by default. If it
-  conforms to the pattern '{TitleOfBook}_{AuthorName}'. Furthermore, the program will automatically scan the folder 
+  conforms to the pattern '{TitleOfBook}_{AuthorName}'. Furthermore, the program will automatically scan the folder
   for a cover art, infer the order of the MP3, calculate co comon bitrate from the existing files, and encode in final
   composition with AAC. All of these options of course can be overridden if desired.
 
-  The files are bound together in the order they are found in the directory. PyAudiobookBinder assumes the chapters 
-  will begin with a zero leading numbering scheme, (01, 02 instead of 1,2). This is a requirement for automatic 
-  ordering so that the software can sort them. For instance, you should name the first chapter something like '01 - 
-  {Ch. Title}.mp3', and so on. Don't forget to use the leading zero for single digit chapter numbers, otherwise you 
-  will get chapters sorted like '1, 10, 11, 12, 2, 3, 4, 5, 6, 7, 8, 9' instead of '01, 02, 03, 04, 05, 06, 07, 08, 
-  09, 10, 11'. 
-  
+  The files are bound together in the order they are found in the directory. PyAudiobookBinder assumes the chapters
+  will begin with a zero leading numbering scheme, (01, 02 instead of 1,2). This is a requirement for automatic
+  ordering so that the software can sort them. For instance, you should name the first chapter something like '01 -
+  {Ch. Title}.mp3', and so on. Don't forget to use the leading zero for single digit chapter numbers, otherwise you
+  will get chapters sorted like '1, 10, 11, 12, 2, 3, 4, 5, 6, 7, 8, 9' instead of '01, 02, 03, 04, 05, 06, 07, 08,
+  09, 10, 11'.
+
   If a number separator is provided, the chapter title will be extracted from the filename by removing the number
   separator and everything before it. For example, if the number separator is ' - ' (space, dash, space), then the
   chapter title will be extracted from the filename '01 - Chapter Title.mp3' as 'Chapter Title'. If no number separator
   is provided, the chapter title will not be extracted from the filename. In this case, the chapter title will be
   simply the filename without the extension.
-  
-  sample usage: 
-    pybind -d "TomSawyer_MarkTwain" 
-  
-  The above commane binds MP3 in the directory ./TomSawyer_MarkTwain, extracts title and author from the directory name, 
+
+  sample usage:
+    pybind -d "TomSawyer_MarkTwain"
+
+  The above commane binds MP3 in the directory ./TomSawyer_MarkTwain, extracts title and author from the directory name,
   sets the bitrate to common bitrate of the MP3 files, encodes the output file with aac, and attaches the cover art if
   found in the directory. The output file will be named 'Tom Sawyer - Mark Twain.m4b' and will be located in the same
   directory as the source files.
-  
+
 """
 
 # %%
@@ -53,38 +53,49 @@ Description:
 class PyAudiobookBinder:
     """
     Args:
-      directory (str): The directory path containing the MP3 files to be concatenated into an M4B file. Defaults to the 
-      current directory. The directory name will be used as the output file name if one is nor provided. The directory 
-      can contain the Title of the book followed by an underscore and then the Author's name. For example if the
-      directory name was 'TomSawyer_MarkTwain', the output file would be named 'TomSawyer_MarkTwain.m4b', the metadata
-      Title would equal 'Tom Sawyer', and Author would be 'Mark Twain'
+      directory (str): The directory path containing the MP3 files to be concatenated
+      into an M4B file. Defaults to the current directory. The directory name will be
+      used as the output file name if one is nor provided. The directory can contain 
+      the Title of the book followed by an underscore and then the Author's name. For
+      example if the directory name was 'TomSawyer_MarkTwain', the output file would
+      be named 'TomSawyer_MarkTwain.m4b', the metadata Title would equal 'Tom Sawyer',
+      and Author would be 'Mark Twain'
 
-      title (str): The title of the audiobook. If not provided, it will be extracted from the directory name. The
-        containing directory name should conform to the pattern '{TitleOfBook}_{Author'sName}' in order for the title to
-        be extracted correctly. Each word in the title should be capitalized.  For example, 'TomSawyer_MarkTwain' would
-        be extracted as 'Tom Sawyer'.
+      title (str): The title of the audiobook. If not provided, it will be extracted
+      from the directory name. The containing directory name should conform to the
+      pattern '{TitleOfBook}_{Author'sName}' in order for the title to be extracted
+      correctly. Each word in the title should be capitalized.  For example,
+      'TomSawyer_MarkTwain' would be extracted as 'Tom Sawyer'.
 
-      author (str): The author of the audiobook. If not provided, it will be extracted from the directory name. The
-        containing directory name should conform to the pattern '{TitleOfBook}_{Author'sName}' in order for the author to
-        be extracted correctly. Each word in the author's name should be capitalized.  For example, 'TomSawyer_MarkTwain'
-        would be extracted as 'Mark Twain'.
+      author (str): The author of the audiobook. If not provided, it will be extracted
+      from the directory name. The containing directory name should conform to the
+      pattern '{TitleOfBook}_{Author'sName}' in order for the author to be extracted
+      correctly. Each word in the author's name should be capitalized.  For example,
+      'TomSawyer_MarkTwain' would be extracted as 'Mark Twain'.
 
-      image (str): The path to the cover image file (JPEG or PNG) for the audiobook. If not provided, the program will
-        look for cover.jpg or cover.png in the source directory, and if found this image wil be used.  Basically, if you
-        have a cover image in the source directory, you don't need to specify it here as long as it is named cover.jog or
-        cover.png.
+      image (str): The path to the cover image file (JPEG or PNG) for the audiobook.
+      If not provided, the program will look for cover.jpg or cover.png in the source
+      directory, and if found this image wil be used.  Basically, if you have a cover
+      image in the source directory, you don't need to specify it here as long as it
+      is named cover.jog or cover.png.
 
-      encoder (str): The audio encoder to be used for the M4B file. Defaults to 'aac'. Valid encoders are: 'aac', 'alac',
-        'flac', 'libmp3lame', and 'mpeg4'.
+      encoder (str): The audio encoder to be used for the M4B file. Defaults to 'aac'.
+      Valid encoders are: 'aac', 'alac','flac', 'libmp3lame', and 'mpeg4'.
 
-      bitrate (int): The bitrate to be used for the M4B file. Defaults to the most common bitrate among the MP3 files in
-        the directory. for instance, if the directory contains 128k, 192k, and 192k mp3 files, the output file will be
-        encoded at 192k.
+      bitrate (int): The bitrate to be used for the M4B file. Defaults to the most
+      common bitrate among the MP3 files in the directory. for instance, if the
+      directory contains 128k, 192k, and 192k mp3 files, the output file will be
+      encoded at 192k.
 
     """
 
-    def __init__(
-        self, directory="", title="", author="", image="", encoder="aac", bitrate=0, number_separator=""
+    def __init__(self, directory="",
+                 title="",
+                 author="",
+                 image="",
+                 encoder="aac",
+                 bitrate=0,
+                 number_separator=""
     ) -> None:
         if directory == "" or directory == ".":
             directory = os.getcwd()
@@ -127,27 +138,29 @@ class PyAudiobookBinder:
             self.directory, os.path.basename(self.directory)
         )
 
-    def create_metadata_file(self, number_separator="") -> str:
+    def create_metadata_file(self) -> str:
         """
         Creates a metadata file for the audiobook.
 
         Args:
-            numberSeparator (str): The character(s) used to separate the chapter number from the chapter title in the MP3 filenames.
-              For example, if the MP3 filenames are '01 - Chapter Title.mp3', '02 - Chapter Title.mp3', etc., then the numberSeparator
-              would be ' - ' (space, dash, space). Defaults to an empty string.
+            numberSeparator (str): The character(s) used to separate the 
+            chapter number from the chapter title in the MP3 filenames.
+            For example, if the MP3 filenames are '01 - Chapter Title.mp3',
+            '02 - Chapter Title.mp3', etc., then the numberSeparator
+            would be ' - ' (space, dash, space). Defaults to an empty string.
 
         Returns:
             string: The filepath of the created metadata file.
         """
 
         if not os.path.exists(self.chapters_file_path):
-            self.create_chapters_file(self.directory)
+            self.create_chapters_file()
 
         chapters = list()
         pattern = re.compile(
             r"(\d+ day[s]?, )?(\d+):(\d+):(\d+)\.\d{3}\s+(.*)")
 
-        with open(self.chapters_file_path, "r") as f:
+        with open(self.chapters_file_path, "r", encoding='utf-8') as f:
             for line in f:
                 x = pattern.match(line)
                 if x:
@@ -170,7 +183,7 @@ class PyAudiobookBinder:
         text += f"album={self.title}\n"
         text += f"artist={self.author}\n"
         text += f"authors={self.author}\n"
-        text += f"genre=Audiobooks\n"
+        text += "genre=Audiobooks\n"
         for i in range(len(chapters) - 1):
             chap = chapters[i]
             title = chap["title"]
@@ -182,7 +195,7 @@ class PyAudiobookBinder:
             )
 
         meta_filepath = os.path.join(self.directory, "ffmetadata.txt")
-        with open(meta_filepath, "w") as myfile:
+        with open(meta_filepath, "w", encoding='utf-8') as myfile:
             myfile.write(text)
 
         print("Created metadata file ffmetadata.txt")
@@ -212,9 +225,11 @@ class PyAudiobookBinder:
 
         Args:
             directory (str): The directory path where the MP3 files are located.
-            numberSeparator (str): The character(s) used to separate the chapter number from the chapter title in the MP3 filenames.
-              For example, if the MP3 filenames are '01 - Chapter Title.mp3', '02 - Chapter Title.mp3', etc., then the numberSeparator
-              would be ' - ' (space, dash, space). Defaults to an empty string.
+            numberSeparator (str): The character(s) used to separate the chapter 
+            number from the chapter title in the MP3 filenames.
+            For example, if the MP3 filenames are '01 - Chapter Title.mp3', 
+            '02 - Chapter Title.mp3', etc., then the numberSeparator
+            would be ' - ' (space, dash, space). Defaults to an empty string.
 
         Returns:
             string: The filepath of the created chapters file.
@@ -231,8 +246,8 @@ class PyAudiobookBinder:
 
         files_list.sort()
 
-        rawChapters = list()
-        currentTimestamp = 0
+        raw_chapters = list()
+        current_timestamp = 0
         for file in files_list:
             title = self.get_filename_without_extension(file)
             if self.number_separator != "":
@@ -240,17 +255,17 @@ class PyAudiobookBinder:
                     title.split(self.number_separator)[1:])
 
             filepath = os.path.join(self.directory, file)
-            audioLength = self.get_duration(filepath)
-            time = str(datetime.timedelta(seconds=currentTimestamp)) + ".000"
-            rawChapters.append(time + " " + title)
-            currentTimestamp = int(currentTimestamp + audioLength)
+            audio_length = self.get_duration(filepath)
+            time = str(datetime.timedelta(seconds=current_timestamp)) + ".000"
+            raw_chapters.append(time + " " + title)
+            current_timestamp = int(current_timestamp + audio_length)
 
         chapters_filepath = os.path.join(self.directory, "chapters.txt")
         if not os.path.exists(chapters_filepath):
             print(f"Creating chapters file {chapters_filepath} ...")
-            with open(chapters_filepath, "w") as chaptersFile:
-                for chapter in rawChapters:
-                    chaptersFile.write(chapter + "\n")
+            with open(chapters_filepath, "w", encoding='utf-8') as chapters_file:
+                for chapter in raw_chapters:
+                    chapters_file.write(chapter + "\n")
 
         return chapters_filepath
 
@@ -426,7 +441,7 @@ class PyAudiobookBinder:
         file_list_path = os.path.join(self.directory, "file_list.txt")
         if not os.path.exists(file_list_path):
             print(f"Creating file list {file_list_path} ...")
-            with open(file_list_path, "w") as file:
+            with open(file_list_path, "w",encoding='utf-8') as file:
                 for mp3_file in mp3_files:
                     file.write(f"file '{mp3_file}'\n")
         return file_list_path
@@ -481,12 +496,17 @@ class PyAudiobookBinder:
         array_as_string = ' '.join([str(element) for element in ffmpeg_cmd])
         print(f"\n{array_as_string}\n")
 
-        subprocess.run(ffmpeg_cmd)
+        subprocess.run(ffmpeg_cmd,check=True)
 
 
 # %%
 # function to determine if we are runnign in ipython notebook
 def is_notebook() -> bool:
+    """Check if the code is running in an IPython notebook.
+
+    Returns:
+        bool: True if running in an IPython notebook, False otherwise.
+    """
     try:
         shell = get_ipython().__class__.__name__
         if shell == "ZMQInteractiveShell":
@@ -500,18 +520,21 @@ def is_notebook() -> bool:
 
 
 def pybind() -> None:
+    """Main function to run the PyAudiobookBinder utility."""
     # parse command line arguments
     parser = argparse.ArgumentParser(
-        description=description, formatter_class=RawTextHelpFormatter)
+        description=DESCRIPTION, formatter_class=RawTextHelpFormatter)
 
     parser.add_argument(
         "-d",
         "--directory",
         default=".",
-        help="""The directory path containing the MP3 files to be concatenated into an M4B file. Defaults to the current directory. The directory name will be used 
-as the output file name if one is nor provided. The directory name can contain the Title of the book followed by an underscore and then the Author's
-name. For example if the directory name was 'TomSawyer_MarkTwain', the output file would be named 'TomSawyer_MarkTwain.m4b', the metadata Title be 
-interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
+        help="""The directory path containing the MP3 files to be concatenated into an M4B file.
+Defaults to the current directory. The directory name will be usedas the output file name if one
+is nor provided. The directory name can contain the Title of the book followed by an underscore
+and then the Author's name. For example if the directory name was 'TomSawyer_MarkTwain', the
+output file would be named 'TomSawyer_MarkTwain.m4b', the metadata Title be interpreted as 
+'Tom Sawyer' and Author as 'Mark Twain'.
 
 """)
 
@@ -522,7 +545,7 @@ interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         type=str,
         default="",
         help="""The title of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern
-'{TitleOfBook}_{AuthorsName}' in order for the title to be extracted correctly. Each word in the title should be capitalized.  For example, 
+'{TitleOfBook}_{AuthorsName}' in order for the title to be extracted correctly. Each word in the title should be capitalized.  For example,
 'TomSawyer_MarkTwain' would be extracted as 'Tom Sawyer'.
 
 """)
@@ -533,8 +556,8 @@ interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         action="store",
         type=str,
         default="",
-        help="""The author of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern 
-'{TitleOfBook}_{AuthorsName}' in order for the author to be extracted correctly. Each word in the author's name should be capitalized.  For example, 
+        help="""The author of the audiobook. If not provided, it will be extracted from the directory name. The containing directory name should conform to the pattern
+'{TitleOfBook}_{AuthorsName}' in order for the author to be extracted correctly. Each word in the author's name should be capitalized.  For example,
 'TomSawyer_MarkTwain' would be extracted as 'Mark Twain'.
 
 """)
@@ -545,7 +568,7 @@ interpreted as 'Tom Sawyer' and Author as 'Mark Twain'.
         action="store",
         type=str,
         default="",
-        help="""The path to the cover art of the book.  If not provided, this software will look for cover.jpg or cover.png in the source directory, and if found this 
+        help="""The path to the cover art of the book.  If not provided, this software will look for cover.jpg or cover.png in the source directory, and if found this
 image wil be atached to the m4b ourput file. If nott found and not specified here, no image will be included'.
 
 """)
@@ -579,14 +602,15 @@ image wil be atached to the m4b ourput file. If nott found and not specified her
         type=str,
         default="",
         help="""The character(s) used to separate the chapter number from the chapter title in the MP3 filenames. For example, if the MP3 filenames are '01 - Chapter Title.mp3',
-'02 - Chapter Title.mp3', etc., then the number separator would be ' - ' (space, dash, space) and title would be extracted as 'Chapter Title'. If no number 
+'02 - Chapter Title.mp3', etc., then the number separator would be ' - ' (space, dash, space) and title would be extracted as 'Chapter Title'. If no number
 separator is provided, the chapter title will simply be the filename without the extension.
 
 """)
 
     if is_notebook():
         a = parser.parse_args("")
-        # change this line to the directory containing the mp3 files for running in a notebook or vscode
+        # change this line to the directory containing the mp3 files
+        # if running in a notebook
         directory = "../../tests/ToSleepInASeaOfStars_ChristopherPaolini"
     else:
         a = parser.parse_args()
