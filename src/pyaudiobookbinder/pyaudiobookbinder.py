@@ -116,15 +116,21 @@ class PyAudiobookBinder:
 
         if title == "":
             self.title = self.extract_title()
-            print(f"Title: {self.title}")
+        else:
+            self.title = title
+        print(f"Title: {self.title}")
 
         if author == "":
             self.author = self.extract_author()
-            print(f"Author: {self.author}")
+        else:
+            self.author = author
+        print(f"Author: {self.author}")
 
         if image == "":
             self.image = self.find_cover_image()
-            print(f"Cover image: {self.image}")
+        else:
+            self.image = image
+        print(f"Cover image: {self.image}")
 
         if bitrate == 0:
             self.bitrate = self.get_common_bitrate()
