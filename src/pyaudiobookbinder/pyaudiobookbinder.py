@@ -506,7 +506,7 @@ class PyAudiobookBinder:
 
 
 # %%
-# function to determine if we are runnign in ipython notebook
+# function to determine if we are running in ipython notebook
 def is_notebook() -> bool:
     """Check if the code is running in an IPython notebook.
 

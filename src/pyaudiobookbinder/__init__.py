@@ -1,1 +1,1 @@
-from .pyaudiobookbinder import PyAudiobookBinder
+from .pyaudiobookbinder import pybind, PyAudiobookBinder
